@@ -4,6 +4,8 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 import string
+import pyLDAvis.gensim_models as gensimvis
+import pyLDAvis
 
 # Download NLTK resources if not already downloaded
 #import nltk
@@ -33,7 +35,7 @@ def preprocess_text(text):
 
 
 # Read data from CSV file
-csv_file = r'C:\Users\hmuen\PycharmProjects\imdb_analysis\data\imdb_dataset.csv'
+csv_file = r'C:\Users\hmuen\PycharmProjects\imdb_analysis\data\imdb_dataset_original.csv'
 df = pd.read_csv(csv_file, sep=";;;;;;")
 
 # Assume the column name containing text data is 'text'
@@ -47,7 +49,7 @@ dictionary = corpora.Dictionary(preprocessed_documents)
 corpus = [dictionary.doc2bow(doc) for doc in preprocessed_documents]
 
 # Train LDA model
-num_topics = 5  # You can adjust the number of topics as per your requirement
+num_topics = 10  # You can adjust the number of topics as per your requirement
 lda_model = models.LdaModel(corpus, num_topics=num_topics, id2word=dictionary, passes=10)
 
 # Print topics
