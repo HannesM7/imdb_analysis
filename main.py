@@ -8,11 +8,11 @@ import pyLDAvis.gensim_models as gensimvis
 import pyLDAvis
 
 # Download NLTK resources if not already downloaded
-#import nltk
+import nltk
 
-#nltk.download('punkt')
-#nltk.download('wordnet')
-#nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('stopwords')
 
 # Preprocess stopwords
 stop_words = set(stopwords.words('english'))
@@ -35,7 +35,7 @@ def preprocess_text(text):
 
 
 # Read data from CSV file
-csv_file = r'C:\Users\hmuen\PycharmProjects\imdb_analysis\data\imdb_dataset_original.csv'
+csv_file = r'C:\Users\A1D5688\Desktop\imdb_analysis\IMDB Dataset.csv'
 df = pd.read_csv(csv_file, sep=";;;;;;")
 
 # Assume the column name containing text data is 'text'
