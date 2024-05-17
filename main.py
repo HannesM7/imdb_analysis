@@ -1,57 +1,55 @@
 import pandas as pd
-from gensim import corpora, models
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
-import string
-import pyLDAvis.gensim_models as gensimvis
-import pyLDAvis
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import TruncatedSVD
+import seaborn as sns
+import matplotlib.pyplot as plt
+import umap.umap_ as umap
 
-# Download NLTK resources if not already downloaded
-#import nltk
+# Sample data
+data = {
+    'text': [
+        "This is the first document.",
+        "This document is the second document.",
+        "And this is the third one.",
+        "Is this the first document?",
+        "This is another document.",
+        "Yet another document."
+    ]
+}
 
-#nltk.download('punkt')
-#nltk.download('wordnet')
-#nltk.download('stopwords')
+# Create a pandas DataFrame
+csv_file = r'C:\Users\hmuen\PycharmProjects\imdb_analysis\data\IMDB Dataset.csv'
+df = pd.read_csv(csv_file)
 
-# Preprocess stopwords
-stop_words = set(stopwords.words('english'))
-specific_words = {"br", "positive", "negative"}
-stop_words.update(specific_words)
+# Preprocess the documents
+vectorizer = TfidfVectorizer(stop_words='english')
+X = vectorizer.fit_transform(df['review'])
 
-# Define function to preprocess text
-def preprocess_text(text):
-    # Tokenize text
-    tokens = word_tokenize(text.lower())
+# Perform truncated SVD
+svd = TruncatedSVD(n_components=10)
+decomposed_matrix = svd.fit_transform(X)
 
-    # Remove punctuation and stopwords
-    tokens = [word for word in tokens if word.isalnum() and word not in stop_words]
-
-    # Lemmatize tokens
-    lemmatizer = WordNetLemmatizer()
-    tokens = [lemmatizer.lemmatize(word) for word in tokens]
-
-    return tokens
-
-
-# Read data from CSV file
-csv_file = r'C:\Users\hmuen\PycharmProjects\imdb_analysis\data\imdb_dataset_original.csv'
-df = pd.read_csv(csv_file, sep=";;;;;;")
-
-# Assume the column name containing text data is 'text'
-texts = df["review,sentiment"].tolist()
-
-# Preprocess documents
-preprocessed_documents = [preprocess_text(text) for text in texts]
-
-# Create dictionary and corpus
-dictionary = corpora.Dictionary(preprocessed_documents)
-corpus = [dictionary.doc2bow(doc) for doc in preprocessed_documents]
-
-# Train LDA model
-num_topics = 10  # You can adjust the number of topics as per your requirement
-lda_model = models.LdaModel(corpus, num_topics=num_topics, id2word=dictionary, passes=10)
+# Get topics
+terms = vectorizer.get_feature_names_out()
+topic_weights = svd.components_
+topics = []
+for i, topic_weights_ in enumerate(topic_weights):
+    top_terms = [terms[idx] for idx in topic_weights_.argsort()[:-10:-1]]
+    topics.append(top_terms)
 
 # Print topics
-for topic in lda_model.print_topics():
-    print(topic)
+for i, topic in enumerate(topics):
+    print(f"Topic {i+1}:")
+    print(", ".join(topic))
+
+# Perform UMAP
+reducer = umap.UMAP(n_components=2, random_state=42)
+embedding = reducer.fit_transform(decomposed_matrix)
+
+# Plot the documents
+plt.figure(figsize=(10, 6))
+plt.scatter(embedding[:, 0], embedding[:, 1], s=50)
+for i, doc in enumerate(df['text']):
+    plt.annotate(doc, (embedding[i, 0], embedding[i, 1]))
+plt.title("Document Embedding")
+plt.show()
