@@ -8,3 +8,4 @@ pyLDAvis==3.4.1
 bertopic==0.16.1
 scipy==1.10.1
 seaborn==0.13.2
+spacy==3.7.5
