@@ -10,7 +10,6 @@ nlp = spacy.load("en_core_web_sm")
 # Load dataset
 data = pd.read_csv("IMDB Dataset.csv")
 
-
 # Preprocess data
 def preprocess(text):
     # Tokenize text
@@ -24,6 +23,9 @@ def preprocess(text):
 
 
 data["clean_text"] = data["review"].apply(preprocess)
+
+# Convert list of lists to list of strings
+data["clean_text"] = data["clean_text"].apply(lambda x: " ".join(x))
 
 # Create BERTopic model
 model = BERTopic(
